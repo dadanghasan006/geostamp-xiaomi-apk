@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>GeoStamp & EXIF Xiaomi 22101316G (Android)</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-border: #334155;
+      --input-bg: #0f172a;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #ff6900;
+      --accent-hover: #ea580c;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.45;
+      padding-bottom: 30px;
+    }
+    header {
+      background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-badge {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 7px;
+    }
+    .brand h1 { font-size: 16px; font-weight: 700; }
+    .brand p { font-size: 11px; color: var(--muted); }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px) {
+      .container { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--card-border);
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .style-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .style-card {
+      background: var(--input-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .style-card.active {
+      border-color: var(--accent);
+      background: rgba(255, 105, 0, 0.1);
+    }
+    .style-card h4 { font-size: 12.5px; font-weight: 700; margin-bottom: 3px; }
+    .style-card p { font-size: 11px; color: var(--muted); }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .form-group { margin-bottom: 8px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      padding: 13px;
+      font-size: 14px;
+    }
+    .btn-secondary {
+      background: #334155;
+      color: var(--text);
+      font-size: 11.5px;
+      padding: 6px 10px;
+    }
+    .btn-success { background: var(--success); color: #fff; }
+    #map {
+      width: 100%;
+      height: 240px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 8px;
+      z-index: 1;
+    }
+    .search-bar { display: flex; gap: 6px; margin-bottom: 8px; }
+    .search-results {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+      display: none;
+    }
+    .search-item {
+      padding: 7px 10px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+    .upload-zone {
+      border: 2px dashed #475569;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .upload-zone h3 { font-size: 13.5px; margin-bottom: 4px; }
+    .upload-zone p { font-size: 11.5px; color: var(--muted); }
+    .preview-container {
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-img-wrap img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border-radius: 4px;
+    }
+    .exif-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .exif-table th, .exif-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--card-border);
+      text-align: left;
+    }
+    .exif-table th { color: var(--muted); width: 42%; }
+    .exif-table td { font-family: monospace; color: #e2e8f0; }
+    .exif-highlight { color: #4ade80 !important; font-weight: 600; }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-badge">ANDROID / MIUI</span>
+      <div>
+        <h1>GeoStamp & EXIF Xiaomi 22101316G</h1>
+        <p>Berjalan 100% Mandiri di HP Android • Resolusi Asli • EXIF Tertanam</p>
+      </div>
+    </div>
+    <button type="button" class="btn btn-secondary" id="btnInstallPwa" style="display:none; background:#10b981; color:#fff;">
+      📲 Install Aplikasi
+    </button>
+  </header>
+
+  <div class="container">
+    <div>
+      <!-- 0. PILIH MODEL TAMPILAN -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎨 Pilih Model Tampilan Stamp</div>
+        </div>
+        <div class="style-selector">
+          <div class="style-card" id="styleCardModel1" onclick="selectStampStyle('model1')">
+            <h4>Model 1: Standar Laporan 🗺️</h4>
+            <p>Peta Jalan kiri bawah + 7 baris teks rata kanan bawah</p>
+          </div>
+          <div class="style-card active" id="styleCardGmc" onclick="selectStampStyle('gmc')">
+            <h4>Model 2: GPS Map Camera 🛰️</h4>
+            <p>Peta Satelit + Kotak Gelap + Bendera 🇮🇩 + Badge GMC</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. PILIH FOTO DARI HP / KAMERA -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">1. Pilih Foto dari Galeri / Kamera HP</div>
+        </div>
+        <div class="upload-zone" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none" />
+          <h3>📷 Ketuk untuk Pilih Foto / Ambil Kamera</h3>
+          <p>Ukuran piksel hasil foto dijamin 100% sama dengan ukuran foto asli</p>
+          <div id="fileBadgeList" style="margin-top:8px; font-size:12px; color:#fdba74;"></div>
+        </div>
+      </div>
+
+      <!-- 2. PETA & LOKASI GPS HP -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">2. Titik Peta & Lokasi</div>
+          <button type="button" class="btn btn-secondary" id="btnMyGps" style="background:#3b82f6; color:#fff;">📍 Gunakan GPS HP Saya</button>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Cari jalan, desa, kecamatan, kota..." />
+          <button type="button" class="btn btn-secondary" id="btnSearch">Cari</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+        <div id="map"></div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="autoReverseGeocode" checked />
+          Otomatis perbarui alamat saat ketuk / geser pin di peta
+        </label>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" step="0.000001" id="latInput" value="-8.260014" />
+          </div>
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" step="0.000001" id="lonInput" value="113.410024" />
+          </div>
+          <div class="form-group">
+            <label>Zoom Kotak Peta</label>
+            <input type="number" min="12" max="19" id="mapZoomInput" value="17" />
+          </div>
+          <div class="form-group" id="opacityGroup" style="display:none;">
+            <label>Transparansi Peta</label>
+            <input type="number" step="0.01" min="0.3" max="1.0" id="mapOpacityInput" value="0.77" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. TANGGAL, WAKTU & ALAMAT -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">3. Tanggal, Waktu & Alamat Stamp</div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-secondary" id="btnRandSec">🎲 Acak Detik</button>
+            <button type="button" class="btn btn-secondary" id="btnNow">🕒 Sekarang</button>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>📅 Pilih Tanggal (Kalender)</label>
+            <input type="date" id="datePickerInput" value="2026-11-10" style="color-scheme:dark;" />
+          </div>
+          <div class="form-group">
+            <label>⏰ Pilih Waktu</label>
+            <div style="display:grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap:4px; align-items:center;">
+              <select id="hourSelect" style="text-align:center; padding:8px 2px; font-weight:600;"></select>
+              <span>:</span>
+              <select id="minSelect" style="text-align:center; padding:8px 2px; font-weight:600;"></select>
+              <span>:</span>
+              <select id="secSelect" style="text-align:center; padding:8px 2px; font-weight:600;"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Format Tanggal & Waktu</label>
+            <input type="text" id="datetimeInput" value="10-11-2026 16:26:22" />
+          </div>
+          <div class="form-group">
+            <label>Zona Waktu</label>
+            <select id="timezoneInput">
+              <option value="WIB" selected>WIB (GMT +07:00)</option>
+              <option value="WITA">WITA (GMT +08:00)</option>
+              <option value="WIT">WIT (GMT +09:00)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MODEL 1 FIELDS -->
+        <div id="fieldsModel1" class="form-grid" style="display:none; margin-top:6px;">
+          <div class="form-group full">
+            <label>Baris 3 — Nama Jalan & Nomor</label>
+            <input type="text" id="line3Input" value="Jalan Ahmad Yani 51" />
+          </div>
+          <div class="form-group">
+            <label>Baris 4 — Desa / Kelurahan</label>
+            <input type="text" id="line4Input" value="Umbulsari" />
+          </div>
+          <div class="form-group">
+            <label>Baris 5 — Kecamatan</label>
+            <input type="text" id="line5Input" value="Kecamatan Umbulsari" />
+          </div>
+          <div class="form-group">
+            <label>Baris 6 — Kabupaten / Kota</label>
+            <input type="text" id="line6Input" value="Kabupaten Jember" />
+          </div>
+          <div class="form-group">
+            <label>Baris 7 — Provinsi</label>
+            <input type="text" id="line7Input" value="Jawa Timur" />
+          </div>
+          <div class="form-group full">
+            <label>Pemisah Desimal Koordinat</label>
+            <select id="coordSepInput">
+              <option value="," selected>Koma ( -8,264079 113,448255 )</option>
+              <option value=".">Titik ( -8.264079 113.448255 )</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- MODEL 2 (GMC) FIELDS -->
+        <div id="fieldsGmc" class="form-grid" style="margin-top:6px;">
+          <div class="form-group full">
+            <label>Judul Lokasi Utama (Baris 1 + Bendera 🇮🇩)</label>
+            <input type="text" id="gmcTitleInput" value="Kecamatan Umbulsari, Jawa Timur, Indonesia" />
+          </div>
+          <div class="form-group full">
+            <label>Alamat Baris 1 (Plus Code, Jalan, Desa, Kecamatan, Kabupaten)</label>
+            <input type="text" id="gmcAddr1Input" value="Pcr5+2rr, Jl. Yos Sudarso, Kandang Rejo, Sukoreno, Kec. Umbulsari, Kabupaten Jember, Jawa" />
+          </div>
+          <div class="form-group full">
+            <label>Alamat Baris 2 (Provinsi, Kode Pos, Negara)</label>
+            <input type="text" id="gmcAddr2Input" value="Timur 68166, Indonesia, Kecamatan Umbulsari, Jawa Timur 68166, Indonesia" />
+          </div>
+          <div class="form-group full" style="display:flex; gap:14px; margin-top:4px;">
+            <label class="checkbox-row">
+              <input type="checkbox" id="showBadgeInput" checked />
+              Badge "GPS Map Camera"
+            </label>
+            <label class="checkbox-row">
+              <input type="checkbox" id="showFlagInput" checked />
+              Bendera Indonesia 🇮🇩
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. EXIF KAMERA XIAOMI -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">4. EXIF Kamera Tertanam (Xiaomi 22101316G)</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Camera Maker (Make)</label>
+            <input type="text" id="makeInput" value="Xiaomi" />
+          </div>
+          <div class="form-group">
+            <label>Camera Model (Model)</label>
+            <input type="text" id="modelInput" value="22101316G" />
+          </div>
+          <div class="form-group full">
+            <label>Software</label>
+            <input type="text" id="softwareInput" value="MediaTek Camera Application" />
+          </div>
+          <div class="form-group">
+            <label>Altitude GPS (mdpl)</label>
+            <input type="number" step="0.1" id="altitudeInput" value="35.0" />
+          </div>
+          <div class="form-group">
+            <label>ISO Speed</label>
+            <input type="number" id="isoInput" value="164" />
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnProcess" style="margin-top:8px;">
+          ⬇ Proses Stamp, Tanam EXIF & Download Sekarang
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: LIVE PREVIEW & EXIF TABLE -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Live Preview Foto <span id="liveStatus" style="font-size:11px; color:#4ade80;"></span></div>
+          <div id="downloadActions" style="display:flex; gap:6px;"></div>
+        </div>
+        <div class="preview-container" id="previewContainer">
+          <p style="color:var(--muted); font-size:13px;">Silakan pilih foto dari Galeri/Kamera untuk melihat Live Preview otomatis.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Verifikasi Data EXIF & Dimensi Tertanam</div>
+        </div>
+        <table class="exif-table" id="exifTable">
+          <tbody>
+            <tr><td colspan="2" style="color:var(--muted);">Pilih foto untuk melihat verifikasi EXIF.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>__PIEXIF_INLINE__</script>
+  <script>
+    const EMBEDDED_ASSETS = __ASSETS_B64_JSON__;
+    const loadedAssetImages = {};
+    const tileCache = {};
+
+    async function preloadAssets() {
+      for (const [k, b64] of Object.entries(EMBEDDED_ASSETS)) {
+        const img = new Image();
+        img.src = b64;
+        await new Promise(r => { img.onload = r; img.onerror = r; });
+        loadedAssetImages[k] = img;
+      }
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+    }
+    preloadAssets();
+
+    let currentStampStyle = 'gmc';
+    let selectedFiles = [];
+    let currentOutputDataUrl = null;
+    let currentOutputFilename = 'LAPORAN.jpg';
+
+    const map = L.map('map').setView([-8.260014, 113.410024], 16);
+    const roadmapLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=id', { maxZoom: 20 });
+    const hybridLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}&hl=id', { maxZoom: 20 });
+    hybridLayer.addTo(map);
+    L.control.layers({ 'Satelit': hybridLayer, 'Peta Jalan': roadmapLayer }).addTo(map);
+    const marker = L.marker([-8.260014, 113.410024], { draggable: true }).addTo(map);
+
+    function selectStampStyle(style) {
+      currentStampStyle = style;
+      document.getElementById('styleCardModel1').classList.toggle('active', style === 'model1');
+      document.getElementById('styleCardGmc').classList.toggle('active', style === 'gmc');
+      document.getElementById('fieldsModel1').style.display = style === 'model1' ? 'grid' : 'none';
+      document.getElementById('fieldsGmc').style.display = style === 'gmc' ? 'grid' : 'none';
+      document.getElementById('opacityGroup').style.display = style === 'model1' ? 'block' : 'none';
+      document.getElementById('mapZoomInput').value = style === 'gmc' ? '17' : '15';
+      triggerLivePreview();
+    }
+
+    function encodePlusCodeShort(lat, lon) {
+      const alphabet = "23456789CFGHJMPQRVWX";
+      let latVal = Math.max(-90, Math.min(89.999999, parseFloat(lat))) + 90;
+      let lonVal = ((parseFloat(lon) + 180) % 360 + 360) % 360;
+      let latInt = Math.round(latVal * 8000);
+      let lonInt = Math.round(lonVal * 8000);
+      const latD = [], lonD = [];
+      for (let i = 0; i < 5; i++) {
+        latD.push(alphabet[latInt % 20]);
+        lonD.push(alphabet[lonInt % 20]);
+        latInt = Math.floor(latInt / 20);
+        lonInt = Math.floor(lonInt / 20);
+      }
+      latD.reverse(); lonD.reverse();
+      const pairs = [];
+      for (let i = 0; i < 5; i++) { pairs.push(latD[i], lonD[i]); }
+      const extra = alphabet[(Math.abs(Math.round(lat * 100000)) + Math.abs(Math.round(lon * 100000))) % 20];
+      const code = pairs.slice(4, 8).join('') + '+' + pairs.slice(8, 10).join('') + extra;
+      return code.charAt(0).toUpperCase() + code.slice(1).toLowerCase();
+    }
+
+    async function updateLocationFromMap(lat, lon) {
+      document.getElementById('latInput').value = lat.toFixed(6);
+      document.getElementById('lonInput').value = lon.toFixed(6);
+      if (!document.getElementById('autoReverseGeocode').checked) {
+        triggerLivePreview();
+        return;
+      }
+      try {
+        const [nomRes, bdcRes] = await Promise.allSettled([
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=id`).then(r => r.json()),
+          fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`).then(r => r.json())
+        ]);
+        const addr = (nomRes.status === 'fulfilled' && nomRes.value.address) ? nomRes.value.address : {};
+        const bdc = (bdcRes.status === 'fulfilled') ? bdcRes.value : {};
+
+        let bdcKec = '', bdcKab = '', bdcProv = '';
+        const items = [...(bdc.localityInfo?.administrative || []), ...(bdc.localityInfo?.informative || [])];
+        for (const it of items) {
+          const name = (it.name || '').trim();
+          const desc = (it.description || '').toLowerCase();
+          if (desc.includes('kecamatan') || it.adminLevel === 6) bdcKec = name;
+          else if (desc.includes('kabupaten')) bdcKab = name.toLowerCase().startsWith('kabupaten') ? name : `Kabupaten ${name}`;
+          else if (desc.startsWith('kota') || desc.includes('kota ')) bdcKab = name.toLowerCase().startsWith('kota') ? name : `Kota ${name}`;
+          else if ((desc.includes('provinsi') || it.adminLevel === 4) && name) bdcProv = name;
+        }
+        if (!bdcKec && bdc.locality && !bdcKab.toLowerCase().includes(bdc.locality.toLowerCase())) {
+          bdcKec = bdc.locality;
+        }
+
+        const road = addr.road || addr.pedestrian || addr.residential || addr.hamlet || 'Jl. Raya';
+        const street = `${road} ${addr.house_number || ''}`.trim();
+        let village = (addr.village || addr.suburb || addr.hamlet || addr.town || '').replace(/^(Desa|Kelurahan|Kel\.)\s+/i, '');
+        let kecRaw = (bdcKec || addr.municipality || addr.city_district || addr.suburb || village || '').replace(/^(Kecamatan|Kec\.)\s+/i, '');
+        const subdistrict = kecRaw ? `Kecamatan ${kecRaw}` : '';
+        const regency = bdcKab || (addr.county ? `Kabupaten ${addr.county}` : (addr.city ? `Kota ${addr.city}` : ''));
+        const province = (bdcProv || addr.state || '').replace(/^(Provinsi|Propinsi)\s+/i, '');
+        const postcode = addr.postcode || '68166';
+        const plusCode = encodePlusCodeShort(lat, lon);
+
+        document.getElementById('line3Input').value = street;
+        document.getElementById('line4Input').value = village;
+        document.getElementById('line5Input').value = subdistrict;
+        document.getElementById('line6Input').value = regency;
+        document.getElementById('line7Input').value = province;
+
+        const gmcTitle = [subdistrict || regency, province, 'Indonesia'].filter(Boolean).join(', ');
+        const kecShort = kecRaw ? `Kec. ${kecRaw}` : '';
+        const parts1 = [plusCode, street, village, kecShort, regency].filter(Boolean);
+        const provWords = province.split(/\s+/);
+        let gmcAddr1 = '', gmcAddr2 = '';
+        if (provWords.length >= 2) {
+          gmcAddr1 = parts1.join(', ') + `, ${provWords[0]}`;
+          gmcAddr2 = `${provWords.slice(1).join(' ')} ${postcode}, Indonesia, ${subdistrict}, ${province} ${postcode}, Indonesia`;
+        } else {
+          gmcAddr1 = parts1.join(', ');
+          gmcAddr2 = `${province} ${postcode}, Indonesia, ${subdistrict}, ${province} ${postcode}, Indonesia`;
+        }
+        document.getElementById('gmcTitleInput').value = gmcTitle;
+        document.getElementById('gmcAddr1Input').value = gmcAddr1;
+        document.getElementById('gmcAddr2Input').value = gmcAddr2;
+      } catch (e) {
+        console.error(e);
+      }
+      triggerLivePreview();
+    }
+
+    map.on('click', e => { marker.setLatLng(e.latlng); updateLocationFromMap(e.latlng.lat, e.latlng.lng); });
+    marker.on('dragend', () => { const p = marker.getLatLng(); updateLocationFromMap(p.lat, p.lng); });
+
+    document.getElementById('btnMyGps').addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('GPS tidak didukung di browser ini.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude, altitude } = pos.coords;
+        if (altitude) document.getElementById('altitudeInput').value = altitude.toFixed(1);
+        marker.setLatLng([latitude, longitude]);
+        map.setView([latitude, longitude], 17);
+        updateLocationFromMap(latitude, longitude);
+      }, err => {
+        alert('Pastikan izin Lokasi / GPS di HP Anda sudah diaktifkan: ' + err.message);
+      }, { enableHighAccuracy: true });
+    });
+
+    // Search
+    document.getElementById('btnSearch').addEventListener('click', async () => {
+      const q = document.getElementById('searchInput').value.trim();
+      const box = document.getElementById('searchResults');
+      if (!q) { box.style.display = 'none'; return; }
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5&countrycodes=id&accept-language=id`);
+      const items = await res.json();
+      box.innerHTML = '';
+      items.forEach(it => {
+        const d = document.createElement('div');
+        d.className = 'search-item';
+        d.textContent = it.display_name;
+        d.onclick = () => {
+          const lat = parseFloat(it.lat), lon = parseFloat(it.lon);
+          marker.setLatLng([lat, lon]);
+          map.setView([lat, lon], 16);
+          updateLocationFromMap(lat, lon);
+          box.style.display = 'none';
+        };
+        box.appendChild(d);
+      });
+      box.style.display = 'block';
+    });
+
+    // Date & Time Pickers (clean numbers without Jam/Mnt/Dtk)
+    const datePickerInput = document.getElementById('datePickerInput');
+    const hourSelect = document.getElementById('hourSelect');
+    const minSelect = document.getElementById('minSelect');
+    const secSelect = document.getElementById('secSelect');
+    const datetimeInput = document.getElementById('datetimeInput');
+    const pad2 = n => String(n).padStart(2, '0');
+
+    for (let h = 0; h < 24; h++) {
+      const o = document.createElement('option');
+      o.value = pad2(h); o.textContent = pad2(h);
+      if (h === 16) o.selected = true;
+      hourSelect.appendChild(o);
+    }
+    for (let m = 0; m < 60; m++) {
+      const o = document.createElement('option');
+      o.value = pad2(m); o.textContent = pad2(m);
+      if (m === 26) o.selected = true;
+      minSelect.appendChild(o);
+    }
+    for (let s = 0; s < 60; s++) {
+      const o = document.createElement('option');
+      o.value = pad2(s); o.textContent = pad2(s);
+      if (s === 22) o.selected = true;
+      secSelect.appendChild(o);
+    }
+
+    function syncPickersToText() {
+      const val = datePickerInput.value;
+      if (!val) return;
+      const [yyyy, mm, dd] = val.split('-');
+      datetimeInput.value = `${dd}-${mm}-${yyyy} ${hourSelect.value}:${minSelect.value}:${secSelect.value}`;
+      triggerLivePreview();
+    }
+    datePickerInput.addEventListener('change', syncPickersToText);
+    hourSelect.addEventListener('change', syncPickersToText);
+    minSelect.addEventListener('change', syncPickersToText);
+    secSelect.addEventListener('change', syncPickersToText);
+
+    document.getElementById('btnRandSec').addEventListener('click', () => {
+      secSelect.value = pad2(Math.floor(Math.random() * 60));
+      syncPickersToText();
+    });
+    document.getElementById('btnNow').addEventListener('click', () => {
+      const now = new Date();
+      datePickerInput.value = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+      hourSelect.value = pad2(now.getHours());
+      minSelect.value = pad2(now.getMinutes());
+      secSelect.value = pad2(now.getSeconds());
+      syncPickersToText();
+    });
+
+    // Upload Photo
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        selectedFiles = Array.from(fileInput.files);
+        document.getElementById('fileBadgeList').textContent = `✅ ${selectedFiles.length} foto dipilih: ${selectedFiles[0].name}`;
+        triggerLivePreview();
+      }
+    });
+
+    let previewDebounce = null;
+    function triggerLivePreview() {
+      if (!selectedFiles.length) return;
+      if (previewDebounce) clearTimeout(previewDebounce);
+      previewDebounce = setTimeout(() => renderClientSideStamp(false), 200);
+    }
+
+    [
+      'latInput', 'lonInput', 'mapZoomInput', 'mapOpacityInput', 'timezoneInput',
+      'datetimeInput', 'line3Input', 'line4Input', 'line5Input', 'line6Input', 'line7Input',
+      'coordSepInput', 'gmcTitleInput', 'gmcAddr1Input', 'gmcAddr2Input',
+      'showBadgeInput', 'showFlagInput', 'makeInput', 'modelInput', 'softwareInput',
+      'altitudeInput', 'isoInput'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', triggerLivePreview);
+        el.addEventListener('change', triggerLivePreview);
+      }
+    });
+
+    async function fetchTileImage(x, y, z, lyrs) {
+      const key = `${lyrs}_${z}_${x}_${y}`;
+      if (tileCache[key]) return tileCache[key];
+      const srv = Math.abs(x + y) % 4;
+      const url = `https://mt${srv}.google.com/vt/lyrs=${lyrs}&x=${x}&y=${y}&z=${z}&scale=2&hl=id`;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = url;
+      await new Promise(r => { img.onload = r; img.onerror = r; });
+      tileCache[key] = img;
+      return img;
+    }
+
+    async function renderGoogleMapCanvas(lat, lon, boxSize, zoom, lyrs, fovPx) {
+      const tileScale = 2;
+      const tileSize = 256 * tileScale;
+      const n = Math.pow(2, zoom);
+      const xt = (lon + 180) / 360 * n;
+      const latRad = lat * Math.PI / 180;
+      const yt = (1 - Math.asinh(Math.tan(latRad)) / Math.PI) / 2 * n;
+
+      const tx0 = Math.floor(xt) - 1;
+      const ty0 = Math.floor(yt) - 1;
+
+      const stitchCanvas = document.createElement('canvas');
+      stitchCanvas.width = tileSize * 3;
+      stitchCanvas.height = tileSize * 3;
+      const sctx = stitchCanvas.getContext('2d');
+      sctx.fillStyle = lyrs === 's' ? '#1e2f23' : '#f2f3f4';
+      sctx.fillRect(0, 0, stitchCanvas.width, stitchCanvas.height);
+
+      const promises = [];
+      for (let dx = 0; dx < 3; dx++) {
+        for (let dy = 0; dy < 3; dy++) {
+          promises.push(
+            fetchTileImage(tx0 + dx, ty0 + dy, zoom, lyrs).then(timg => {
+              if (timg && timg.complete && timg.naturalWidth) {
+                sctx.drawImage(timg, dx * tileSize, dy * tileSize, tileSize, tileSize);
+              }
+            })
+          );
+        }
+      }
+      await Promise.all(promises);
+
+      const localCx = (xt - tx0) * tileSize;
+      const localCy = (yt - ty0) * tileSize;
+      const srcCrop = fovPx * tileScale;
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = boxSize;
+      outCanvas.height = boxSize;
+      const octx = outCanvas.getContext('2d');
+      octx.drawImage(
+        stitchCanvas,
+        localCx - srcCrop / 2,
+        localCy - srcCrop / 2,
+        srcCrop,
+        srcCrop,
+        0,
+        0,
+        boxSize,
+        boxSize
+      );
+      return outCanvas;
+    }
+
+    function roundRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function parseInputDate(dtStr) {
+      const m = dtStr.trim().match(/^(\d{2})[-/](\d{2})[-/](\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?/);
+      if (m) {
+        return new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]), parseInt(m[4]), parseInt(m[5]), parseInt(m[6] || '0'));
+      }
+      return new Date();
+    }
+
+    function buildExifBinary(width, height, lat, lon, altitude, dtObj, tzLabel, make, model, software, iso) {
+      const pad = n => String(n).padStart(2, '0');
+      const exifDt = `${dtObj.getFullYear()}:${pad(dtObj.getMonth()+1)}:${pad(dtObj.getDate())} ${pad(dtObj.getHours())}:${pad(dtObj.getMinutes())}:${pad(dtObj.getSeconds())}`;
+      const tzHours = tzLabel === 'WITA' ? 8 : (tzLabel === 'WIT' ? 9 : 7);
+      const offsetStr = `+${pad(tzHours)}:00`;
+      const utcDt = new Date(dtObj.getTime() - tzHours * 3600 * 1000);
+
+      function toDms(deg) {
+        const abs = Math.abs(deg);
+        const d = Math.floor(abs);
+        const rem = (abs - d) * 60;
+        const m = Math.floor(rem);
+        const s = Math.round((rem - m) * 60 * 10000);
+        return [[d, 1], [m, 1], [s, 10000]];
+      }
+
+      const zeroth = {};
+      zeroth[piexif.ImageIFD.Make] = make;
+      zeroth[piexif.ImageIFD.Model] = model;
+      zeroth[piexif.ImageIFD.Software] = software;
+      zeroth[piexif.ImageIFD.DateTime] = exifDt;
+      zeroth[piexif.ImageIFD.Orientation] = 1;
+      zeroth[piexif.ImageIFD.XResolution] = [72, 1];
+      zeroth[piexif.ImageIFD.YResolution] = [72, 1];
+      zeroth[piexif.ImageIFD.ResolutionUnit] = 2;
+      zeroth[piexif.ImageIFD.ImageWidth] = width;
+      zeroth[piexif.ImageIFD.ImageLength] = height;
+
+      const exif = {};
+      exif[piexif.ExifIFD.DateTimeOriginal] = exifDt;
+      exif[piexif.ExifIFD.DateTimeDigitized] = exifDt;
+      exif[piexif.ExifIFD.OffsetTime] = offsetStr;
+      exif[piexif.ExifIFD.OffsetTimeOriginal] = offsetStr;
+      exif[piexif.ExifIFD.OffsetTimeDigitized] = offsetStr;
+      exif[piexif.ExifIFD.FNumber] = [188, 100];
+      exif[piexif.ExifIFD.FocalLength] = [559, 100];
+      exif[piexif.ExifIFD.FocalLengthIn35mmFilm] = 24;
+      exif[piexif.ExifIFD.ISOSpeedRatings] = parseInt(iso) || 164;
+      exif[piexif.ExifIFD.ExposureTime] = [1, 100];
+      exif[piexif.ExifIFD.PixelXDimension] = width;
+      exif[piexif.ExifIFD.PixelYDimension] = height;
+
+      const gps = {};
+      gps[piexif.GPSIFD.GPSVersionID] = [2, 2, 0, 0];
+      gps[piexif.GPSIFD.GPSLatitudeRef] = lat < 0 ? 'S' : 'N';
+      gps[piexif.GPSIFD.GPSLatitude] = toDms(lat);
+      gps[piexif.GPSIFD.GPSLongitudeRef] = lon < 0 ? 'W' : 'E';
+      gps[piexif.GPSIFD.GPSLongitude] = toDms(lon);
+      gps[piexif.GPSIFD.GPSAltitudeRef] = altitude < 0 ? 1 : 0;
+      gps[piexif.GPSIFD.GPSAltitude] = [Math.round(Math.abs(altitude) * 100), 100];
+      gps[piexif.GPSIFD.GPSMapDatum] = 'WGS-84';
+      gps[piexif.GPSIFD.GPSTimeStamp] = [[utcDt.getHours(), 1], [utcDt.getMinutes(), 1], [utcDt.getSeconds(), 1]];
+      gps[piexif.GPSIFD.GPSDateStamp] = `${utcDt.getFullYear()}:${pad(utcDt.getMonth()+1)}:${pad(utcDt.getDate())}`;
+
+      return { dump: piexif.dump({ "0th": zeroth, "Exif": exif, "GPS": gps }), exifDt, offsetStr };
+    }
+
+    async function renderClientSideStamp(isDownloadAction = false) {
+      if (!selectedFiles.length) return;
+      const statusEl = document.getElementById('liveStatus');
+      if (statusEl) statusEl.textContent = '• Memperbarui preview...';
+
+      await preloadAssets();
+
+      const file = selectedFiles[0];
+      const imgUrl = URL.createObjectURL(file);
+      const origImg = new Image();
+      origImg.src = imgUrl;
+      await new Promise(r => { origImg.onload = r; });
+
+      const w = origImg.naturalWidth;
+      const h = origImg.naturalHeight;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(origImg, 0, 0, w, h);
+      URL.revokeObjectURL(imgUrl);
+
+      const lat = parseFloat(document.getElementById('latInput').value) || -8.260014;
+      const lon = parseFloat(document.getElementById('lonInput').value) || 113.410024;
+      const altitude = parseFloat(document.getElementById('altitudeInput').value) || 35.0;
+      const dtStr = document.getElementById('datetimeInput').value.trim();
+      const tzLabel = document.getElementById('timezoneInput').value;
+      const zoom = parseInt(document.getElementById('mapZoomInput').value) || 17;
+      const dtObj = parseInputDate(dtStr);
+
+      if (currentStampStyle === 'model1') {
+        const scale = w >= h ? Math.min(w, h) / 1439.0 : w / 1439.0;
+        const boxSize = Math.max(64, Math.round(411 * scale));
+        const marginLeft = Math.max(1, Math.round(5 * scale));
+        const marginBottom = Math.max(1, Math.round(5 * scale));
+        const opacity = parseFloat(document.getElementById('mapOpacityInput').value) || 0.77;
+
+        const mapCanvas = await renderGoogleMapCanvas(lat, lon, boxSize, zoom, 'm', 278);
+        const s = boxSize / 411.0;
+        const mctx = mapCanvas.getContext('2d');
+        if (loadedAssetImages.google_logo) {
+          const gw = Math.round(68 * s), gh = Math.round(22 * s);
+          mctx.drawImage(loadedAssetImages.google_logo, Math.round(8 * s), boxSize - gh - Math.round(16 * s), gw, gh);
+        }
+        if (loadedAssetImages.pin) {
+          const pw = Math.round(42 * s), ph = Math.round(58 * s);
+          mctx.drawImage(loadedAssetImages.pin, Math.round(boxSize / 2 - pw / 2), Math.round(boxSize / 2 - ph + 2 * s), pw, ph);
+        }
+
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(mapCanvas, marginLeft, h - marginBottom - boxSize);
+        ctx.restore();
+
+        const sep = document.getElementById('coordSepInput').value;
+        const coordLine = `${lat.toFixed(6).replace('.', sep)} ${lon.toFixed(6).replace('.', sep)}`;
+        const timeLine = `${dtStr} ${tzLabel}`;
+        const addrLines = [
+          document.getElementById('line3Input').value,
+          document.getElementById('line4Input').value,
+          document.getElementById('line5Input').value,
+          document.getElementById('line6Input').value,
+          document.getElementById('line7Input').value
+        ].map(s => s.trim()).filter(Boolean);
+        const allLines = [timeLine, coordLine, ...addrLines];
+
+        const fontSize = Math.max(12, Math.round(63 * scale));
+        const lineStep = 65 * scale;
+        const rightMargin = 14 * scale;
+        const bottomMargin = 11 * scale;
+
+        ctx.save();
+        ctx.font = `400 ${fontSize}px "Roboto Condensed", sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.75)';
+        ctx.shadowBlur = Math.max(2, 3 * scale);
+        ctx.lineWidth = Math.max(1, 2.2 * scale);
+        ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillStyle = '#ffffff';
+
+        for (let i = 0; i < allLines.length; i++) {
+          const linesFromBot = (allLines.length - 1) - i;
+          const yBase = h - bottomMargin - linesFromBot * lineStep;
+          ctx.strokeText(allLines[i], w - rightMargin, yBase);
+          ctx.fillText(allLines[i], w - rightMargin, yBase);
+        }
+        ctx.restore();
+      } else {
+        // Model 2: GPS Map Camera
+        const s = Math.min(w / 4096.0, h / 1600.0);
+        const mapSize = Math.max(80, Math.round(553 * s));
+        const gap = Math.max(4, Math.round(38 * s));
+        const cardW = Math.max(200, Math.round(2719 * s));
+        const cardH = mapSize;
+        const botMargin = Math.max(4, Math.round(38 * s));
+        const cornerR = Math.max(4, Math.round(16 * s));
+
+        const totalW = mapSize + gap + cardW;
+        const leftX = Math.round((w - totalW) / 2);
+        const topY = h - botMargin - mapSize;
+        const cardX = leftX + mapSize + gap;
+        const cardY = topY;
+
+        const satCanvas = await renderGoogleMapCanvas(lat, lon, mapSize, zoom, 's', 135);
+        const sctx = satCanvas.getContext('2d');
+        if (loadedAssetImages.gmc_pin_cone) {
+          sctx.drawImage(loadedAssetImages.gmc_pin_cone, 0, 0, mapSize, mapSize);
+        }
+        if (loadedAssetImages.gmc_google_white) {
+          sctx.drawImage(loadedAssetImages.gmc_google_white, 0, 0, mapSize, mapSize);
+        }
+
+        ctx.save();
+        roundRectPath(ctx, leftX, topY, mapSize, mapSize, cornerR);
+        ctx.clip();
+        ctx.drawImage(satCanvas, leftX, topY);
+        ctx.restore();
+
+        if (document.getElementById('showBadgeInput').checked) {
+          const badgeW = Math.round(350 * s);
+          const badgeH = Math.round(92 * s);
+          const badgeX = cardX + cardW - badgeW;
+          const badgeY = cardY - badgeH - Math.round(6 * s);
+          ctx.save();
+          roundRectPath(ctx, badgeX, badgeY, badgeW, badgeH, Math.round(14 * s));
+          ctx.fillStyle = 'rgba(16, 16, 16, 0.56)';
+          ctx.fill();
+          if (loadedAssetImages.gmc_icon) {
+            const icSz = Math.round(64 * s);
+            ctx.drawImage(loadedAssetImages.gmc_icon, badgeX + Math.round(19 * s), badgeY + Math.round((badgeH - icSz) / 2), icSz, icSz);
+          }
+          ctx.font = `400 ${Math.round(31 * s)}px "Roboto", sans-serif`;
+          ctx.fillStyle = '#f2f2f2';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('GPS Map Camera', badgeX + Math.round(98 * s), badgeY + badgeH / 2 + Math.round(2 * s));
+          ctx.restore();
+        }
+
+        ctx.save();
+        roundRectPath(ctx, cardX, cardY, cardW, cardH, cornerR);
+        ctx.fillStyle = 'rgba(18, 18, 18, 0.54)';
+        ctx.fill();
+
+        const padX = cardX + Math.round(48 * s);
+        const titleText = document.getElementById('gmcTitleInput').value.trim();
+        ctx.font = `400 ${Math.round(88 * s)}px "Roboto", sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.textBaseline = 'top';
+        ctx.fillText(titleText, padX, cardY + Math.round(96 * s));
+
+        if (document.getElementById('showFlagInput').checked && loadedAssetImages.id_flag) {
+          const tw = ctx.measureText(titleText).width;
+          const fw = Math.round(104 * s), fh = Math.round(76 * s);
+          ctx.drawImage(loadedAssetImages.id_flag, padX + tw + Math.round(22 * s), cardY + Math.round(98 * s), fw, fh);
+        }
+
+        ctx.font = `400 ${Math.round(56 * s)}px "Roboto", sans-serif`;
+        ctx.fillStyle = '#f8f8f8';
+        ctx.fillText(document.getElementById('gmcAddr1Input').value.trim(), padX, cardY + Math.round(205 * s));
+        ctx.fillText(document.getElementById('gmcAddr2Input').value.trim(), padX, cardY + Math.round(275 * s));
+        ctx.fillText(`Lat ${lat.toFixed(6)}° Long ${lon.toFixed(6)}°`, padX, cardY + Math.round(347 * s));
+
+        const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const dayName = daysId[dtObj.getDay()];
+        const h24 = dtObj.getHours();
+        const ampm = h24 >= 12 ? 'PM' : 'AM';
+        const h12 = pad2(h24 % 12 || 12);
+        const gmtOff = tzLabel === 'WITA' ? '+08:00' : (tzLabel === 'WIT' ? '+09:00' : '+07:00');
+        const gmcTimeLine = `${dayName}, ${pad2(dtObj.getDate())}/${pad2(dtObj.getMonth()+1)}/${dtObj.getFullYear()} ${h12}:${pad2(dtObj.getMinutes())} ${ampm} GMT ${gmtOff}`;
+        ctx.fillText(gmcTimeLine, padX, cardY + Math.round(417 * s));
+        ctx.restore();
+      }
+
+      const rawJpegUrl = canvas.toDataURL('image/jpeg', 0.95);
+      const make = document.getElementById('makeInput').value.trim() || 'Xiaomi';
+      const model = document.getElementById('modelInput').value.trim() || '22101316G';
+      const software = document.getElementById('softwareInput').value.trim() || 'MediaTek Camera Application';
+      const iso = document.getElementById('isoInput').value;
+
+      const exifInfo = buildExifBinary(w, h, lat, lon, altitude, dtObj, tzLabel, make, model, software, iso);
+      currentOutputDataUrl = piexif.insert(exifInfo.dump, rawJpegUrl);
+      currentOutputFilename = `LAPORAN_${pad2(dtObj.getDate())}-${pad2(dtObj.getMonth()+1)}-${dtObj.getFullYear()}_${pad2(dtObj.getHours())}-${pad2(dtObj.getMinutes())}.jpg`;
+
+      // Update Preview UI
+      const previewContainer = document.getElementById('previewContainer');
+      previewContainer.innerHTML = `
+        <div class="preview-img-wrap">
+          <img src="${currentOutputDataUrl}" alt="Preview Hasil" />
+        </div>
+        <div style="margin-top:8px; font-size:11.5px; color:var(--muted);">
+          Nama File: <b style="color:#fff">${currentOutputFilename}</b> |
+          Resolusi: <b style="color:#4ade80">${w} x ${h} px (100% Ukuran Asli)</b>
+        </div>
+      `;
+
+      // Update EXIF Verification Table
+      const tbody = document.querySelector('#exifTable tbody');
+      const rows = [
+        ['Nama File Export', currentOutputFilename, true],
+        ['Dimensi Gambar', `${w} x ${h} px`, true],
+        ['Camera Maker (Make)', make, true],
+        ['Camera Model (Model)', model, true],
+        ['Software', software, true],
+        ['DateTimeOriginal', exifInfo.exifDt, true],
+        ['OffsetTime', exifInfo.offsetStr, false],
+        ['GPSLatitude', `${lat.toFixed(6)} (${lat < 0 ? 'S' : 'N'})`, true],
+        ['GPSLongitude', `${lon.toFixed(6)} (${lon < 0 ? 'W' : 'E'})`, true],
+        ['GPSAltitude', `${altitude} m`, false],
+        ['Aperture & Focal Length', 'f/1.88 • 5.59 mm (24mm eq)', false]
+      ];
+      tbody.innerHTML = rows.map(([k, v, hl]) => `
+        <tr><th>${k}</th><td class="${hl ? 'exif-highlight' : ''}">${v}</td></tr>
+      `).join('');
+
+      if (statusEl) statusEl.textContent = '• Live Preview Siap';
+
+      if (isDownloadAction && currentOutputDataUrl) {
+        // 1. If running inside our compiled Android APK, save directly to Android Downloads folder!
+        if (window.AndroidDownloader && typeof window.AndroidDownloader.saveImage === 'function') {
+          window.AndroidDownloader.saveImage(currentOutputDataUrl, currentOutputFilename);
+          return;
+        }
+        // 2. Otherwise trigger browser download
+        try {
+          const byteString = atob(currentOutputDataUrl.split(',')[1]);
+          const ab = new ArrayBuffer(byteString.length);
+          const ia = new Uint8Array(ab);
+          for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+          const blob = new Blob([ab], { type: 'image/jpeg' });
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = currentOutputFilename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+        } catch (e) {
+          const a = document.createElement('a');
+          a.href = currentOutputDataUrl;
+          a.download = currentOutputFilename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+    }
+
+    document.getElementById('btnProcess').addEventListener('click', () => renderClientSideStamp(true));
+
+    // PWA Install Prompt
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnInstallPwa');
+      btn.style.display = 'inline-flex';
+      btn.onclick = async () => {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        btn.style.display = 'none';
+      };
+    });
+  </script>
+</body>
+</html>
